@@ -4,41 +4,23 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export default function Home() {
-  const navLinks = [
-    { label: "Dashboard", href: "/dashboard" },
-    { label: "Accounts", href: "/accounts" },
-    { label: "Transactions", href: "/transactions" },
-    { label: "Reports", href: "/reports" },
-  ];
-
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900">
       {/* Navigation */}
       <nav className="border-b border-blue-500/30 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-white">FinanceHub</h1>
-          <div className="flex gap-6 items-center">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-white/80 hover:text-white transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
-            <div className="flex gap-4">
-              <Link href="/auth">
-                <Button className="bg-white/20 hover:bg-white/30 text-white border border-white/30">
-                  Sign In
-                </Button>
-              </Link>
-              <Link href="/dashboard">
-                <Button className="bg-white text-blue-600 hover:bg-blue-50">
-                  Dashboard
-                </Button>
-              </Link>
-            </div>
+          <div className="flex gap-4">
+            <Link href="/auth">
+              <Button className="bg-white/20 hover:bg-white/30 text-white border border-white/30">
+                Sign In
+              </Button>
+            </Link>
+            <Link href="/dashboard">
+              <Button className="bg-white text-blue-600 hover:bg-blue-50">
+                Dashboard
+              </Button>
+            </Link>
           </div>
         </div>
       </nav>
@@ -95,53 +77,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Page Features */}
-        <div className="mt-24">
-          <h3 className="text-3xl font-bold text-white mb-12 text-center">
-            Template Features
-          </h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                title: "Dashboard",
-                description: "Overview of accounts and recent transactions",
-                icon: "📊",
-                href: "/dashboard",
-              },
-              {
-                title: "Accounts",
-                description: "Manage and view all your accounts",
-                icon: "🏦",
-                href: "/accounts",
-              },
-              {
-                title: "Transactions",
-                description: "Track and filter all transactions",
-                icon: "💸",
-                href: "/transactions",
-              },
-              {
-                title: "Reports",
-                description: "Analytics and financial insights",
-                icon: "📈",
-                href: "/reports",
-              },
-            ].map((feature) => (
-              <Link key={feature.href} href={feature.href}>
-                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 hover:bg-white/15 transition-colors cursor-pointer group">
-                  <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">
-                    {feature.icon}
-                  </div>
-                  <h4 className="text-lg font-semibold text-white mb-2">
-                    {feature.title}
-                  </h4>
-                  <p className="text-blue-100 text-sm">{feature.description}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-
         {/* Tech Stack */}
         <div className="mt-24 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-12">
           <h3 className="text-2xl font-bold text-white mb-8 text-center">
@@ -170,9 +105,6 @@ export default function Home() {
           <p>
             &copy; 2026 FinanceHub. Built as a modern SaaS template for financial
             applications.
-          </p>
-          <p className="text-sm mt-2">
-            Next.js 14 LTS • TypeScript • Tailwind CSS • Composer Pattern
           </p>
         </div>
       </footer>
