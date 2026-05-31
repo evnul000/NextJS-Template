@@ -84,7 +84,7 @@ export default function Home() {
           </h3>
           <div className="grid md:grid-cols-5 gap-4 text-center">
             {[
-              { name: "Next.js 14 LTS", icon: "⚡" },
+              { name: "Next.js 15 LTS", icon: "⚡" },
               { name: "TypeScript", icon: "📘" },
               { name: "React 18+", icon: "⚛️" },
               { name: "Tailwind CSS", icon: "🎨" },
