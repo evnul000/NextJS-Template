@@ -1,6 +1,6 @@
 # FinanceHub - SaaS Financial Platform
 
-A modern, full-featured financial SaaS application built with Next.js 14+, TypeScript, Tailwind CSS, SCSS, and Shadcn UI components. Designed for managing financial facilities with a professional dashboard interface.
+A modern, full-featured financial SaaS application built with Next.js 15+ LTS, TypeScript, Tailwind CSS, SCSS, and Shadcn UI components. Designed for managing financial facilities with a professional dashboard interface.
 
 ## Features
 
