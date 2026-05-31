@@ -15,7 +15,7 @@ A modern, full-featured financial SaaS application built with Next.js 15+ LTS, T
 
 ## Tech Stack
 
-- **Framework**: [Next.js 14+](https://nextjs.org) with App Router
+- **Framework**: [Next.js 15+](https://nextjs.org) with App Router
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/) + [SCSS](https://sass-lang.com/)
 - **UI Components**: [Shadcn UI](https://ui.shadcn.com/)
