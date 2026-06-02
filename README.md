@@ -1,6 +1,10 @@
 # FinanceHub — Next.js 14 LTS SaaS Template
 
+<<<<<<< HEAD
 A production-ready financial SaaS template built with **Next.js 14 LTS**, TypeScript, Tailwind CSS, SCSS, and Shadcn UI.
+=======
+A modern, full-featured financial SaaS application built with Next.js 15+ LTS, TypeScript, Tailwind CSS, SCSS, and Shadcn UI components. Designed for managing financial facilities with a professional dashboard interface.
+>>>>>>> 841d2c0fda65303e2009828c5ea583725894cdfa
 
 ---
 
@@ -25,6 +29,7 @@ src/
   styles/                ← SCSS + global CSS
 ```
 
+<<<<<<< HEAD
 ### Layer diagram
 
 ```
@@ -197,6 +202,14 @@ npm run format:check
 Rules defined in `.eslintrc.json` and `.prettierrc`.
 
 ---
+=======
+- **Framework**: [Next.js 15+](https://nextjs.org) with App Router
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) + [SCSS](https://sass-lang.com/)
+- **UI Components**: [Shadcn UI](https://ui.shadcn.com/)
+- **Package Manager**: npm
+- **Development Server**: Hot module reloading enabled
+>>>>>>> 841d2c0fda65303e2009828c5ea583725894cdfa
 
 ## Project Structure
 
