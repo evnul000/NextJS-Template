@@ -1,24 +1,15 @@
 import { NextResponse } from "next/server";
 import { TransactionService } from "@/composer/services/transaction.service";
-import { ApiResponse } from "@/types";
+import type { ApiResponse } from "@/types";
 
 /**
- * GET /api/transactions/account/[accountId]
- * Retrieve transactions for a specific account
+ * GET /api/transactions/account/:accountId
  */
-export async function GET(
-  request: Request,
-  { params }: { params: { accountId: string } }
-) {
+export async function GET(_request: Request, props: { params: Promise<{ accountId: string }> }) {
+  const params = await props.params;
   try {
-    const { accountId } = params;
-    const transactions = await TransactionService.getAccountTransactions(accountId);
-
-    const response: ApiResponse = {
-      success: true,
-      data: transactions,
-    };
-
+    const transactions = await TransactionService.getTransactionsByAccount(params.accountId);
+    const response: ApiResponse = { success: true, data: transactions };
     return NextResponse.json(response);
   } catch (error) {
     const response: ApiResponse = {

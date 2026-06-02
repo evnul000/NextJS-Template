@@ -1,106 +1,107 @@
-import { Transaction } from "@/types";
+import type { Transaction } from "@/types";
 
 /**
- * Transaction Repository
- * Handles all transaction-related data operations
+ * TransactionRepository
+ * Data access layer for transaction operations
+ * Replace mock data with database queries
  */
-export class TransactionRepository {
-  /**
-   * Mock data - replace with actual database calls
-   */
-  private static mockTransactions: Transaction[] = [
-    {
-      id: "txn_001",
-      accountId: "acc_001",
-      type: "expense",
-      amount: 150,
-      description: "Grocery shopping",
-      category: "Food",
-      date: new Date("2024-05-30"),
-      status: "completed",
-      createdAt: new Date("2024-05-30"),
-      updatedAt: new Date("2024-05-30"),
-    },
-    {
-      id: "txn_002",
-      accountId: "acc_001",
-      type: "income",
-      amount: 3000,
-      description: "Monthly salary",
-      category: "Salary",
-      date: new Date("2024-05-01"),
-      status: "completed",
-      createdAt: new Date("2024-05-01"),
-      updatedAt: new Date("2024-05-01"),
-    },
-  ];
 
+// Mock data - REPLACE WITH DATABASE QUERIES
+const mockTransactions: Transaction[] = [
+  {
+    id: "txn_001",
+    accountId: "acc_001",
+    type: "expense",
+    amount: 50,
+    description: "Grocery Store",
+    category: "Groceries",
+    date: new Date("2026-01-15"),
+    status: "completed",
+    createdAt: new Date("2026-01-15"),
+    updatedAt: new Date("2026-01-15"),
+  },
+  {
+    id: "txn_002",
+    accountId: "acc_001",
+    type: "income",
+    amount: 2000,
+    description: "Monthly Salary",
+    category: "Salary",
+    date: new Date("2026-01-01"),
+    status: "completed",
+    createdAt: new Date("2026-01-01"),
+    updatedAt: new Date("2026-01-01"),
+  },
+  {
+    id: "txn_003",
+    accountId: "acc_002",
+    type: "transfer",
+    amount: 500,
+    description: "Transfer to Savings",
+    category: "Transfer",
+    date: new Date("2026-01-10"),
+    status: "completed",
+    createdAt: new Date("2026-01-10"),
+    updatedAt: new Date("2026-01-10"),
+  },
+];
+
+export class TransactionRepository {
   /**
    * Get all transactions
    */
   static async getAllTransactions(): Promise<Transaction[]> {
-    // TODO: Replace with actual database query
-    return this.mockTransactions;
+    // TODO: Replace with database query
+    // return await db.transaction.findMany();
+    return mockTransactions;
   }
 
   /**
-   * Get transactions by account ID
+   * Get transactions for account
    */
-  static async getTransactionsByAccountId(accountId: string): Promise<Transaction[]> {
-    // TODO: Replace with actual database query
-    return this.mockTransactions.filter((txn) => txn.accountId === accountId);
+  static async getAccountTransactions(accountId: string): Promise<Transaction[]> {
+    // TODO: Replace with database query
+    // return await db.transaction.findMany({ where: { accountId } });
+    return mockTransactions.filter((t) => t.accountId === accountId);
   }
 
   /**
-   * Get transaction by ID
+   * Create transaction
    */
-  static async getTransactionById(id: string): Promise<Transaction | null> {
-    // TODO: Replace with actual database query
-    return this.mockTransactions.find((txn) => txn.id === id) || null;
-  }
-
-  /**
-   * Create new transaction
-   */
-  static async createTransaction(
-    transaction: Omit<Transaction, "id" | "createdAt" | "updatedAt">
-  ): Promise<Transaction> {
-    // TODO: Replace with actual database insert
-    const newTransaction: Transaction = {
-      ...transaction,
-      id: `txn_${Date.now()}`,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.mockTransactions.push(newTransaction);
-    return newTransaction;
+  static async createTransaction(transaction: Transaction): Promise<Transaction> {
+    // TODO: Replace with database query
+    // return await db.transaction.create({ data: transaction });
+    mockTransactions.push(transaction);
+    return transaction;
   }
 
   /**
    * Update transaction
    */
-  static async updateTransaction(id: string, updates: Partial<Transaction>): Promise<Transaction | null> {
-    // TODO: Replace with actual database update
-    const transaction = this.mockTransactions.find((txn) => txn.id === id);
-    if (!transaction) return null;
+  static async updateTransaction(
+    id: string,
+    data: Partial<Transaction>
+  ): Promise<Transaction> {
+    // TODO: Replace with database query
+    // return await db.transaction.update({ where: { id }, data });
+    const transaction = mockTransactions.find((t) => t.id === id);
+    if (!transaction) throw new Error("Transaction not found");
 
-    const updated = {
-      ...transaction,
-      ...updates,
-      updatedAt: new Date(),
-    };
-    const index = this.mockTransactions.findIndex((txn) => txn.id === id);
-    this.mockTransactions[index] = updated;
+    const updated = { ...transaction, ...data, updatedAt: new Date() };
+    const index = mockTransactions.indexOf(transaction);
+    mockTransactions[index] = updated;
     return updated;
   }
 
   /**
-   * Get transactions for a date range
+   * Delete transaction
    */
-  static async getTransactionsByDateRange(startDate: Date, endDate: Date): Promise<Transaction[]> {
-    // TODO: Replace with actual database query
-    return this.mockTransactions.filter(
-      (txn) => txn.date >= startDate && txn.date <= endDate
-    );
+  static async deleteTransaction(id: string): Promise<void> {
+    // TODO: Replace with database query
+    // return await db.transaction.delete({ where: { id } });
+    const index = mockTransactions.findIndex((t) => t.id === id);
+    if (index === -1) throw new Error("Transaction not found");
+
+    mockTransactions.splice(index, 1);
   }
 }

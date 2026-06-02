@@ -6,9 +6,12 @@ import { ApiResponse } from "@/types";
  * GET /api/accounts/[id]
  * Retrieve a specific account by ID
  */
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const account = await AccountService.getAccountById(id);
 
     if (!account) {

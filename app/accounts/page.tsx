@@ -14,11 +14,14 @@ export default function AccountsPage() {
       try {
         const res = await fetch("/api/accounts");
         const data = await res.json();
-        if (data.success) {
+        if (data.success && Array.isArray(data.data.accounts)) {
           setAccounts(data.data.accounts);
+        } else {
+          setAccounts([]);
         }
       } catch (error) {
         console.error("Error fetching accounts:", error);
+        setAccounts([]);
       } finally {
         setLoading(false);
       }

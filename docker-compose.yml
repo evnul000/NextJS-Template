@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    image: financehub:latest
+    container_name: financehub-app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Optional: add a database service when you switch from mock data
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: financehub-db
+  #   environment:
+  #     POSTGRES_USER: ${POSTGRES_USER:-financehub}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+  #     POSTGRES_DB: ${POSTGRES_DB:-financehub}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+
+# volumes:
+#   postgres_data:

@@ -1,93 +1,65 @@
-import { Transaction } from "@/types";
 import { TransactionRepository } from "../repositories/transaction.repository";
-import { AccountRepository } from "../repositories/account.repository";
+import type { Transaction } from "@/types";
 
 /**
- * Transaction Service
+ * TransactionService
  * Business logic for transaction operations
  */
 export class TransactionService {
-  /**
-   * Get all transactions
-   */
   static async getAllTransactions(): Promise<Transaction[]> {
     return TransactionRepository.getAllTransactions();
   }
 
-  /**
-   * Get transactions for an account
-   */
-  static async getAccountTransactions(accountId: string): Promise<Transaction[]> {
+  static async getTransactionsByAccount(accountId: string): Promise<Transaction[]> {
     return TransactionRepository.getTransactionsByAccountId(accountId);
   }
 
-  /**
-   * Create a new transaction and update account balance
-   */
-  static async createTransaction(
-    accountId: string,
-    type: Transaction["type"],
-    amount: number,
-    description: string,
-    category: string
-  ): Promise<Transaction> {
-    // Validate account exists
-    const account = await AccountRepository.getAccountById(accountId);
-    if (!account) {
-      throw new Error("Account not found");
-    }
-
-    // Create transaction
-    const transaction = await TransactionRepository.createTransaction({
-      accountId,
-      type,
-      amount,
-      description,
-      category,
+  static async createTransaction(data: {
+    accountId: string;
+    type: Transaction["type"];
+    amount: number;
+    description: string;
+    category: string;
+  }): Promise<Transaction> {
+    return TransactionRepository.createTransaction({
+      id: `tx_${Date.now()}`,
+      ...data,
       date: new Date(),
-      status: "completed",
+      status: "pending",
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
+  }
 
-    // Update account balance
-    let newBalance = account.balance;
-    if (type === "income") {
-      newBalance += amount;
-    } else if (type === "expense") {
-      newBalance -= amount;
-    }
+  static async updateTransaction(
+    id: string,
+    data: Partial<Transaction>
+  ): Promise<Transaction> {
+    return TransactionRepository.updateTransaction(id, data);
+  }
 
-    await AccountRepository.updateAccount(accountId, { balance: newBalance });
-
-    return transaction;
+  static async deleteTransaction(id: string): Promise<void> {
+    return TransactionRepository.deleteTransaction(id);
   }
 
   /**
-   * Get monthly statistics
+   * Calculate monthly income/expense totals
    */
-  static async getMonthlyStats(accountId: string): Promise<{
-    income: number;
-    expenses: number;
-    net: number;
-  }> {
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  static async getMonthlyStats(year: number, month: number) {
+    const all = await TransactionRepository.getAllTransactions();
+    const inMonth = all.filter((tx) => {
+      const d = new Date(tx.date);
+      return d.getFullYear() === year && d.getMonth() + 1 === month;
+    });
 
-    const transactions = await TransactionRepository.getTransactionsByDateRange(startOfMonth, endOfMonth);
-    const accountTransactions = transactions.filter((txn) => txn.accountId === accountId);
+    const income = inMonth
+      .filter((tx) => tx.type === "income" && tx.status === "completed")
+      .reduce((s, tx) => s + tx.amount, 0);
 
-    const income = accountTransactions
-      .filter((txn) => txn.type === "income")
-      .reduce((sum, txn) => sum + txn.amount, 0);
+    const expense = inMonth
+      .filter((tx) => tx.type === "expense" && tx.status === "completed")
+      .reduce((s, tx) => s + tx.amount, 0);
 
-    const expenses = accountTransactions
-      .filter((txn) => txn.type === "expense")
-      .reduce((sum, txn) => sum + txn.amount, 0);
-
-    return {
-      income,
-      expenses,
-      net: income - expenses,
-    };
+    return { income, expense, net: income - expense, count: inMonth.length };
   }
 }

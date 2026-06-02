@@ -18,11 +18,14 @@ export default function TransactionsPage() {
       try {
         const res = await fetch("/api/transactions");
         const data = await res.json();
-        if (data.success) {
+        if (data.success && Array.isArray(data.data)) {
           setTransactions(data.data);
+        } else {
+          setTransactions([]);
         }
       } catch (error) {
         console.error("Error fetching transactions:", error);
+        setTransactions([]);
       } finally {
         setLoading(false);
       }

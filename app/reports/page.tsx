@@ -27,9 +27,21 @@ export default function ReportsPage() {
         const transactionsData = await transactionsRes.json();
 
         if (accountsData.success && transactionsData.success) {
+          if (Array.isArray(accountsData.data.accounts) && Array.isArray(transactionsData.data)) {
+            setReportData({
+              accounts: accountsData.data.accounts,
+              transactions: transactionsData.data,
+            });
+          } else {
+            setReportData({
+              accounts: [],
+              transactions: [],
+            });
+          }
+        } else {
           setReportData({
-            accounts: accountsData.data.accounts,
-            transactions: transactionsData.data,
+            accounts: [],
+            transactions: [],
           });
         }
       } catch (error) {

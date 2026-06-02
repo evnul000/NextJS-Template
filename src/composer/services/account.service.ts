@@ -1,24 +1,53 @@
-import { Account } from "@/types";
 import { AccountRepository } from "../repositories/account.repository";
+import type { Account } from "@/types";
 
 /**
- * Account Service
- * Business logic for account operations
+ * AccountService
+ * High-level business logic for account operations
  */
 export class AccountService {
-  /**
-   * Get all user accounts with statistics
-   */
-  static async getAccountsWithStats(): Promise<Account[]> {
-    return AccountRepository.getAllAccounts();
-  }
-
   /**
    * Get total balance across all accounts
    */
   static async getTotalBalance(): Promise<number> {
     const accounts = await AccountRepository.getAllAccounts();
     return accounts.reduce((sum, account) => sum + account.balance, 0);
+  }
+
+  /**
+   * Get accounts with statistics
+   */
+  static async getAccountsWithStats() {
+    const accounts = await AccountRepository.getAllAccounts();
+    const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+    const activeAccounts = accounts.filter((acc) => acc.isActive).length;
+
+    return {
+      accounts,
+      totalBalance,
+      activeAccounts,
+      averageBalance: totalBalance / (accounts.length || 1),
+    };
+  }
+
+  /**
+   * Create a new account
+   */
+  static async createAccount(
+    name: string,
+    type: string,
+    initialBalance: number = 0
+  ): Promise<Account> {
+    return AccountRepository.createAccount({
+      id: `acc_${Date.now()}`,
+      name,
+      type: type as any,
+      balance: initialBalance,
+      currency: "USD",
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
   }
 
   /**
@@ -29,33 +58,19 @@ export class AccountService {
   }
 
   /**
-   * Create a new account
+   * Update account
    */
-  static async createAccount(
-    name: string,
-    type: Account["type"],
-    initialBalance: number = 0
+  static async updateAccount(
+    id: string,
+    data: Partial<Account>
   ): Promise<Account> {
-    return AccountRepository.createAccount({
-      name,
-      type,
-      balance: initialBalance,
-      currency: "USD",
-      isActive: true,
-    });
+    return AccountRepository.updateAccount(id, data);
   }
 
   /**
-   * Update account balance
+   * Delete account
    */
-  static async updateAccountBalance(id: string, newBalance: number): Promise<Account | null> {
-    return AccountRepository.updateAccount(id, { balance: newBalance });
-  }
-
-  /**
-   * Close an account
-   */
-  static async closeAccount(id: string): Promise<Account | null> {
-    return AccountRepository.updateAccount(id, { isActive: false });
+  static async deleteAccount(id: string): Promise<void> {
+    return AccountRepository.deleteAccount(id);
   }
 }

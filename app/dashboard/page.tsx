@@ -17,26 +17,30 @@ export default function DashboardPage() {
         const accountsRes = await fetch("/api/accounts");
         const accountsData = await accountsRes.json();
 
-        if (accountsData.success) {
+        if (accountsData.success && Array.isArray(accountsData.data.accounts)) {
           setAccounts(accountsData.data.accounts);
 
           // Calculate stats
           const stats: DashboardStats = {
             totalAccounts: accountsData.data.accounts.length,
-            totalBalance: accountsData.data.totalBalance,
+            totalBalance: accountsData.data.totalBalance || 0,
             monthlyIncome: 0,
             monthlyExpense: 0,
             transactionCount: 0,
           };
           setStats(stats);
+        } else {
+          setAccounts([]);
         }
 
         // Fetch transactions
         const transactionsRes = await fetch("/api/transactions");
         const transactionsData = await transactionsRes.json();
 
-        if (transactionsData.success) {
+        if (transactionsData.success && Array.isArray(transactionsData.data)) {
           setRecentTransactions(transactionsData.data.slice(0, 5));
+        } else {
+          setRecentTransactions([]);
         }
       } catch (error) {
         console.error("Error fetching data:", error);

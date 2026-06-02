@@ -1,236 +1,262 @@
-# FinanceHub - SaaS Financial Platform
+# FinanceHub — Next.js 14 LTS SaaS Template
 
-A modern, full-featured financial SaaS application built with Next.js 14+, TypeScript, Tailwind CSS, SCSS, and Shadcn UI components. Designed for managing financial facilities with a professional dashboard interface.
+A production-ready financial SaaS template built with **Next.js 14 LTS**, TypeScript, Tailwind CSS, SCSS, and Shadcn UI.
 
-## Features
+---
 
-- 🎯 **Modern Dashboard** - Comprehensive financial overview with key metrics
-- 💰 **Account Management** - Manage multiple financial accounts
-- 📊 **Transaction Tracking** - Real-time transaction monitoring and history
-- 📈 **Analytics & Reports** - Detailed financial reports and insights
-- 🔐 **Type-Safe** - Full TypeScript support throughout the application
-- 🎨 **Beautiful UI** - Shadcn UI components with Tailwind CSS styling
-- 📱 **Responsive Design** - Works seamlessly across all devices
-- ⚡ **High Performance** - Next.js with Turbopack for fast builds
+## Architecture Overview
 
-## Tech Stack
+```
+app/                     ← Next.js App Router (pages + API routes)
+  api/                   ← All REST endpoints
+    accounts/            ← CRUD for accounts
+    transactions/        ← CRUD for transactions
+    health/              ← Docker/k8s health check
+src/
+  lib/
+    api-client.ts        ← Centralized API Module (use this everywhere)
+  composer/              ← Business logic layer
+    services/            ← High-level domain operations
+    repositories/        ← Data access (swap mock → DB here)
+  types/                 ← Shared TypeScript interfaces
+  components/
+    ui/                  ← Reusable UI primitives
+    dashboard/           ← Dashboard-specific components
+  styles/                ← SCSS + global CSS
+```
 
-- **Framework**: [Next.js 14+](https://nextjs.org) with App Router
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) + [SCSS](https://sass-lang.com/)
-- **UI Components**: [Shadcn UI](https://ui.shadcn.com/)
-- **Package Manager**: npm
-- **Development Server**: Hot module reloading enabled
+### Layer diagram
+
+```
+Browser / Page Component
+        ↓
+  API  (src/lib/api-client.ts)   ← Single interface, like Clerk
+        ↓
+  Next.js API Route  (app/api/)
+        ↓
+  Service  (src/composer/services/)
+        ↓
+  Repository  (src/composer/repositories/)
+        ↓
+  Database / External API  (swap mock data here)
+```
+
+---
+
+## Centralized API Module
+
+All API calls go through **`src/lib/api-client.ts`** — a single typed interface, similar to how Clerk exposes its SDK.
+
+```ts
+import { API } from "@/lib/api-client"
+
+// Accounts
+const { data } = await API.accounts.getAll()
+const account   = await API.accounts.getById("acc_001")
+const created   = await API.accounts.create({ name: "Savings", type: "savings" })
+await API.accounts.update("acc_001", { balance: 9000 })
+await API.accounts.delete("acc_001")
+
+// Transactions
+const txs = await API.transactions.getAll()
+const acc = await API.transactions.getByAccountId("acc_001")
+
+// Dashboard
+const stats = await API.dashboard.getStats()
+```
+
+Every call returns `ApiResponse<T>`:
+```ts
+interface ApiResponse<T> {
+  success: boolean
+  data?: T
+  error?: string
+  statusCode?: number
+}
+```
+
+---
+
+## Getting Started
+
+```bash
+# 1. Install
+npm install
+
+# 2. Configure environment
+cp .env.example .env.local
+# edit .env.local
+
+# 3. Develop
+npm run dev          # → http://localhost:3000
+```
+
+---
+
+## Available Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start dev server with HMR |
+| `npm run build` | Production build |
+| `npm start` | Run production build |
+| `npm run lint` | ESLint |
+| `npm run lint:fix` | ESLint with auto-fix |
+| `npm run format` | Prettier format |
+| `npm run type-check` | TypeScript check (`tsc --noEmit`) |
+| `npm test` | Jest unit tests |
+| `npm run test:watch` | Jest watch mode |
+| `npm run test:coverage` | Jest with coverage report |
+| `npm run test:ci` | CI-optimised test run |
+| `npm run validate` | lint + type-check + test + build |
+| `npm run docker:up` | Start with Docker Compose |
+| `npm run docker:build` | Build Docker image |
+
+---
+
+## Docker Deployment
+
+The Dockerfile uses a **4-stage build** that enforces quality gates:
+
+```
+Stage 1 (deps)      — npm ci (all deps)
+Stage 2 (validate)  — lint + type-check + tests must pass ✓
+Stage 3 (builder)   — next build
+Stage 4 (runner)    — minimal production image
+```
+
+```bash
+# Build & run locally
+docker-compose up -d
+
+# Or manually
+docker build -t financehub:latest .
+docker run -p 3000:3000 --env-file .env.local financehub:latest
+```
+
+Health check endpoint: `GET /api/health`
+
+---
+
+## Composer Pattern
+
+The Composer directory is your business logic layer. It is intentionally kept **framework-agnostic** — no Next.js imports, pure TypeScript.
+
+### Adding a new domain (e.g. Invoices)
+
+1. Create `src/composer/repositories/invoice.repository.ts`  
+2. Create `src/composer/services/invoice.service.ts`  
+3. Create `src/composer/services/invoice.service.test.ts`  
+4. Export both from `src/composer/index.ts`  
+5. Add API routes in `app/api/invoices/`  
+6. Add to `API` object in `src/lib/api-client.ts`
+
+### Connecting a real database
+
+Replace the mock arrays in `src/composer/repositories/*.repository.ts` with your ORM calls:
+
+```ts
+// Before (mock)
+return mockAccounts.find(a => a.id === id) ?? null
+
+// After (Prisma example)
+return db.account.findUnique({ where: { id } })
+```
+
+---
+
+## Testing
+
+Tests live alongside the source files (`*.test.ts` / `*.test.tsx`).
+
+```bash
+npm test                 # run all tests
+npm run test:coverage    # with HTML coverage report (open coverage/index.html)
+```
+
+### Test patterns included
+
+| File | Pattern |
+|---|---|
+| `src/lib/api-client.test.ts` | HTTP mock (jest.fn on fetch), tests all resource modules |
+| `src/composer/services/account.service.test.ts` | Repository mock, tests service logic in isolation |
+| `src/composer/services/transaction.service.test.ts` | Same pattern for transactions |
+| `src/components/ui/button.test.tsx` | React component rendering + interactions |
+
+---
+
+## Linting & Formatting
+
+```bash
+npm run lint        # ESLint
+npm run lint:fix    # ESLint + auto-fix
+npm run format      # Prettier
+npm run format:check
+```
+
+Rules defined in `.eslintrc.json` and `.prettierrc`.
+
+---
 
 ## Project Structure
 
 ```
-.
-├── app/                          # Next.js App Router
-│   ├── globals.css              # Global Tailwind styles
-│   ├── layout.tsx               # Root layout
-│   └── page.tsx                 # Dashboard home page
+├── app/
+│   ├── api/
+│   │   ├── accounts/           GET, POST, PATCH, DELETE
+│   │   ├── transactions/       GET, POST
+│   │   └── health/             GET (health check)
+│   ├── dashboard/
+│   ├── accounts/
+│   ├── transactions/
+│   ├── reports/
+│   ├── settings/
+│   └── auth/
 ├── src/
-│   ├── components/
-│   │   ├── dashboard/           # Dashboard-specific components
-│   │   │   ├── header.tsx
-│   │   │   ├── sidebar.tsx
-│   │   │   └── stat-card.tsx
-│   │   └── ui/                  # Reusable UI components (Shadcn-inspired)
-│   │       ├── badge.tsx
-│   │       ├── button.tsx
-│   │       ├── card.tsx
-│   │       └── input.tsx
 │   ├── lib/
-│   │   └── utils.ts             # Utility functions (cn, classname merger)
+│   │   ├── api-client.ts       ← Centralized API Module
+│   │   └── utils.ts
+│   ├── types/
+│   │   └── index.ts            ← All shared types
+│   ├── composer/
+│   │   ├── index.ts
+│   │   ├── services/
+│   │   └── repositories/
+│   ├── components/
+│   │   ├── ui/
+│   │   └── dashboard/
 │   └── styles/
-│       └── dashboard.scss       # Custom SCSS styles
-├── public/                      # Static assets
-├── package.json
-├── tsconfig.json
-├── tailwind.config.ts
-├── postcss.config.mjs
-└── next.config.ts
+├── .eslintrc.json
+├── .prettierrc
+├── jest.config.js
+├── jest.setup.js
+├── Dockerfile                  ← 4-stage build
+├── docker-compose.yml
+└── tsconfig.json
 ```
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+ or 20+
-- npm, yarn, or pnpm
-
-### Installation
-
-1. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-2. **Run the development server**:
-   ```bash
-   npm run dev
-   ```
-
-3. **Open your browser**:
-   Navigate to [http://localhost:3000](http://localhost:3000)
-
-The application will automatically reload as you make changes.
-
-## Available Scripts
-
-### Development
-```bash
-npm run dev
-```
-Starts the development server with hot module reloading.
-
-### Build
-```bash
-npm run build
-```
-Creates an optimized production build.
-
-### Production
-```bash
-npm start
-```
-Runs the production build.
-
-### Linting
-```bash
-npm run lint
-```
-Runs ESLint to check code quality.
-
-## Component Library
-
-### UI Components
-
-- **Button** - Primary action button with multiple variants
-- **Card** - Container component for content sections
-- **Badge** - Status indicator badges
-- **Input** - Text input field with styling
-
-### Dashboard Components
-
-- **Sidebar** - Navigation sidebar with menu items
-- **DashboardHeader** - Page header with title and actions
-- **StatCard** - Key metric display card with trends
-
-## Styling
-
-The project uses a combination of:
-
-1. **Tailwind CSS** - For utility-first styling and responsive design
-2. **SCSS Modules** - For custom component-specific styles in `src/styles/dashboard.scss`
-3. **CSS Variables** - For theming and consistent design tokens
-
-### CSS Architecture
-
-- Global styles: `app/globals.css`
-- Component styles: Individual component files
-- Custom SCSS: `src/styles/dashboard.scss`
-
-## TypeScript Configuration
-
-Full TypeScript support with:
-- Strict mode enabled
-- Path aliases (`@/*` → `./src/*`)
-- React 18+ JSX syntax
-- Complete type definitions for Next.js
-
-## Development Best Practices
-
-1. **Component Organization** - Place components in `src/components/` with appropriate subdirectories
-2. **Type Safety** - Always define prop types and use TypeScript interfaces
-3. **Styling** - Use Tailwind classes first, then SCSS for complex styling
-4. **Imports** - Use the `@/` alias for cleaner, more maintainable imports
-
-Example:
-```tsx
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-```
-
-## Deployment
-
-### Vercel (Recommended)
-
-The easiest way to deploy is using [Vercel](https://vercel.com):
-
-1. Push your code to a Git repository (GitHub, GitLab, or Bitbucket)
-2. Import your repository in Vercel
-3. Vercel will automatically detect Next.js and configure the build settings
-4. Your application will be live on a Vercel URL
-
-### Other Hosting Platforms
-
-The application can be deployed to any platform that supports Node.js:
-- AWS
-- Google Cloud Platform
-- Azure
-- DigitalOcean
-- etc.
-
-## Environment Variables
-
-Create a `.env.local` file for local environment variables:
-
-```
-NEXT_PUBLIC_API_URL=http://localhost:3000
-# Add more variables as needed
-```
-
-## Useful Resources
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
-- [Shadcn UI Components](https://ui.shadcn.com/)
-- [React Documentation](https://react.dev/)
-
-## Extensions & Tools
-
-Recommended VS Code extensions:
-- ESLint - Code quality checking
-- Tailwind CSS IntelliSense - CSS class suggestions
-- TypeScript Vue Plugin - Enhanced TypeScript support
-- Prettier - Code formatter
-
-## Contributing
-
-1. Create a feature branch
-2. Make your changes
-3. Run `npm run lint` to check code quality
-4. Commit your changes
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support
-
-For issues, questions, or suggestions, please open an issue on the repository.
 
 ---
 
-**Built with ❤️ using Next.js, TypeScript, and Tailwind CSS**
+## Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Vercel (recommended)
 
-## Learn More
+Push to GitHub → import in Vercel → deploy. No config needed.
 
-To learn more about Next.js, take a look at the following resources:
+### Docker / any Node.js host
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+docker-compose up -d
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+See `Dockerfile` for full multi-stage build with lint/test gates.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Roadmap / TODO
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [ ] Replace mock repository data with a real database (Prisma + PostgreSQL recommended)
+- [ ] Add authentication (Clerk or NextAuth)
+- [ ] Add Stripe subscriptions
+- [ ] Add end-to-end tests (Playwright)
+- [ ] Add CI/CD pipeline (GitHub Actions)

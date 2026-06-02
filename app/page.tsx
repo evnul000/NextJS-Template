@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@/lib/clerk.client";
 
 export default function Home() {
   const navLinks = [
@@ -13,10 +14,10 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900">
-      {/* Navigation */}
       <nav className="border-b border-blue-500/30 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-white">FinanceHub</h1>
+
           <div className="flex gap-6 items-center">
             {navLinks.map((link) => (
               <Link
@@ -27,12 +28,21 @@ export default function Home() {
                 {link.label}
               </Link>
             ))}
-            <div className="flex gap-4">
-              <Link href="/auth">
-                <Button className="bg-white/20 hover:bg-white/30 text-white border border-white/30">
-                  Sign In
-                </Button>
-              </Link>
+
+            <div className="flex gap-4 items-center">
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <Button className="bg-white/20 hover:bg-white/30 text-white border border-white/30">
+                    Sign In
+                  </Button>
+                </SignInButton>
+              </SignedOut>
+
+              <SignedIn>
+                {/* Post-sign-out URL set via NEXT_PUBLIC_CLERK_AFTER_SIGN_OUT_URL in .env.local */}
+                <UserButton />
+              </SignedIn>
+
               <Link href="/dashboard">
                 <Button className="bg-white text-blue-600 hover:bg-blue-50">
                   Dashboard
@@ -43,7 +53,6 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-6 py-24">
         <div className="text-center mb-16">
           <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">
@@ -65,76 +74,33 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Features Grid */}
         <div className="grid md:grid-cols-3 gap-8 mt-24">
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-8 hover:bg-white/15 transition-colors">
-            <div className="text-4xl mb-4">💼</div>
-            <h3 className="text-xl font-bold text-white mb-3">Account Management</h3>
-            <p className="text-blue-100">
-              Manage multiple accounts with real-time balance updates and detailed
-              tracking.
-            </p>
-          </div>
-
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-8 hover:bg-white/15 transition-colors">
-            <div className="text-4xl mb-4">📊</div>
-            <h3 className="text-xl font-bold text-white mb-3">Analytics & Reports</h3>
-            <p className="text-blue-100">
-              Gain insights into your spending patterns with comprehensive analytics
-              and reports.
-            </p>
-          </div>
-
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-8 hover:bg-white/15 transition-colors">
-            <div className="text-4xl mb-4">🔒</div>
-            <h3 className="text-xl font-bold text-white mb-3">Secure & Reliable</h3>
-            <p className="text-blue-100">
-              Enterprise-grade security with encrypted data storage and secure API
-              endpoints.
-            </p>
-          </div>
+          {[
+            { icon: "💼", title: "Account Management", desc: "Manage multiple accounts with real-time balance updates and detailed tracking." },
+            { icon: "📊", title: "Analytics & Reports", desc: "Gain insights into your spending patterns with comprehensive analytics and reports." },
+            { icon: "🔒", title: "Secure & Reliable", desc: "Enterprise-grade security with encrypted data storage and secure API endpoints." },
+          ].map((f) => (
+            <div key={f.title} className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-8 hover:bg-white/15 transition-colors">
+              <div className="text-4xl mb-4">{f.icon}</div>
+              <h3 className="text-xl font-bold text-white mb-3">{f.title}</h3>
+              <p className="text-blue-100">{f.desc}</p>
+            </div>
+          ))}
         </div>
 
-        {/* Page Features */}
         <div className="mt-24">
-          <h3 className="text-3xl font-bold text-white mb-12 text-center">
-            Template Features
-          </h3>
+          <h3 className="text-3xl font-bold text-white mb-12 text-center">Template Features</h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              {
-                title: "Dashboard",
-                description: "Overview of accounts and recent transactions",
-                icon: "📊",
-                href: "/dashboard",
-              },
-              {
-                title: "Accounts",
-                description: "Manage and view all your accounts",
-                icon: "🏦",
-                href: "/accounts",
-              },
-              {
-                title: "Transactions",
-                description: "Track and filter all transactions",
-                icon: "💸",
-                href: "/transactions",
-              },
-              {
-                title: "Reports",
-                description: "Analytics and financial insights",
-                icon: "📈",
-                href: "/reports",
-              },
+              { title: "Dashboard", description: "Overview of accounts and recent transactions", icon: "📊", href: "/dashboard" },
+              { title: "Accounts", description: "Manage and view all your accounts", icon: "🏦", href: "/accounts" },
+              { title: "Transactions", description: "Track and filter all transactions", icon: "💸", href: "/transactions" },
+              { title: "Reports", description: "Analytics and financial insights", icon: "📈", href: "/reports" },
             ].map((feature) => (
               <Link key={feature.href} href={feature.href}>
                 <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 hover:bg-white/15 transition-colors cursor-pointer group">
-                  <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">
-                    {feature.icon}
-                  </div>
-                  <h4 className="text-lg font-semibold text-white mb-2">
-                    {feature.title}
-                  </h4>
+                  <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">{feature.icon}</div>
+                  <h4 className="text-lg font-semibold text-white mb-2">{feature.title}</h4>
                   <p className="text-blue-100 text-sm">{feature.description}</p>
                 </div>
               </Link>
@@ -142,11 +108,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Tech Stack */}
         <div className="mt-24 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-12">
-          <h3 className="text-2xl font-bold text-white mb-8 text-center">
-            Built With Modern Technologies
-          </h3>
+          <h3 className="text-2xl font-bold text-white mb-8 text-center">Built With Modern Technologies</h3>
           <div className="grid md:grid-cols-5 gap-4 text-center">
             {[
               { name: "Next.js 14 LTS", icon: "⚡" },
@@ -164,16 +127,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="border-t border-blue-500/30 backdrop-blur-md mt-24">
         <div className="max-w-7xl mx-auto px-6 py-8 text-center text-blue-100">
-          <p>
-            &copy; 2026 FinanceHub. Built as a modern SaaS template for financial
-            applications.
-          </p>
-          <p className="text-sm mt-2">
-            Next.js 14 LTS • TypeScript • Tailwind CSS • Composer Pattern
-          </p>
+          <p>&copy; 2026 FinanceHub. Built as a modern SaaS template for financial applications.</p>
+          <p className="text-sm mt-2">Next.js 14 LTS • TypeScript • Tailwind CSS • Composer Pattern</p>
         </div>
       </footer>
     </main>
